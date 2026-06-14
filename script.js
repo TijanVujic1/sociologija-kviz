@@ -189,6 +189,12 @@ function showQuestion() {
 
   shuffleArray(shuffledOptions);
 
+  if (q.options.length === 2) {
+    optionsContainer.classList.add("truefalse");
+  } else {
+    optionsContainer.classList.remove("truefalse");
+  }
+
   shuffledOptions.forEach((item) => {
     const btn = document.createElement("button");
 
@@ -442,6 +448,8 @@ function resetQuestion() {
   nextBtn.classList.add("hidden");
 
   optionsContainer.innerHTML = "";
+
+  optionsContainer.classList.remove("truefalse");
 }
 
 // ===============================
