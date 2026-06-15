@@ -322,11 +322,11 @@ body {
 }
 
 .option-btn.correct {
-  background: #22c55e;
+  background: #0a361a;
 }
 
 .option-btn.wrong {
-  background: #ef4444;
+  background: #631414;
 }
 
 .option-btn:disabled {

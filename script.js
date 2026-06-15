@@ -50,10 +50,17 @@ let wrongQuestions = JSON.parse(localStorage.getItem("wrongQuestions")) || [];
 
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-let categoryStats = JSON.parse(localStorage.getItem("categoryStats")) || {};
+const SUBJECT = QUESTIONS[0].subject;
+
+let categoryStats =
+  JSON.parse(localStorage.getItem(`categoryStats-${SUBJECT}`)) || {};
 
 function getQuestionKey(question) {
   return `${question.subject}-${question.id}`;
+}
+
+function getCategoryKey(question) {
+  return `${question.subject}-${question.category}`;
 }
 
 // ===============================
@@ -233,14 +240,16 @@ function selectAnswer(button, selectedIndex) {
   });
 
   // Inicializacija statistike
-  if (!categoryStats[q.category]) {
-    categoryStats[q.category] = {
+  const categoryKey = getCategoryKey(q);
+
+  if (!categoryStats[categoryKey]) {
+    categoryStats[categoryKey] = {
       correct: 0,
       total: 0,
     };
   }
 
-  categoryStats[q.category].total++;
+  categoryStats[categoryKey].total++;
 
   // ==========================
   // PRAVILEN ODGOVOR
@@ -249,9 +258,9 @@ function selectAnswer(button, selectedIndex) {
   if (selectedIndex === q.answer) {
     button.classList.add("correct");
 
-    feedback.textContent = "✅ Pravilen odgovor!";
+    feedback.textContent = "Pravilen odgovor!";
 
-    categoryStats[q.category].correct++;
+    categoryStats[categoryKey].correct++;
 
     score++;
 
@@ -293,7 +302,10 @@ function selectAnswer(button, selectedIndex) {
   // SHRANI STATISTIKO
   // ==========================
 
-  localStorage.setItem("categoryStats", JSON.stringify(categoryStats));
+  localStorage.setItem(
+    `categoryStats-${SUBJECT}`,
+    JSON.stringify(categoryStats),
+  );
 
   // ==========================
   // RAZLAGA
@@ -351,17 +363,23 @@ function finishQuiz() {
 
   // ustvari novo statistiko
 
+  const currentSubject = questions[0].subject;
+
   const statsText = Object.entries(categoryStats)
 
-    .map(([cat, stat]) => {
+    .filter(([key]) => key.startsWith(`${currentSubject}-`))
+
+    .map(([key, stat]) => {
+      const category = key.replace(`${currentSubject}-`, "");
+
       const percent = Math.round((stat.correct / stat.total) * 100);
 
       return `
-                <div class="stats-row">
-                    <span>${capitalize(cat)}</span>
-                    <strong>${percent}%</strong>
-                </div>
-            `;
+            <div class="stats-row">
+                <span>${capitalize(category)}</span>
+                <strong>${percent}%</strong>
+            </div>
+        `;
     })
 
     .join("");
@@ -415,10 +433,10 @@ function getGrade(percent) {
 // ===============================
 
 function saveBestScore() {
-  const best = localStorage.getItem("bestScore");
+  const best = localStorage.getItem(`bestScore-${SUBJECT}`);
 
   if (best === null || score > Number(best)) {
-    localStorage.setItem("bestScore", score);
+    localStorage.setItem(`bestScore-${SUBJECT}`, score);
   }
 }
 
@@ -535,6 +553,15 @@ document.getElementById("closeCategoriesBtn").onclick = () => {
 };
 
 document.getElementById("saveCategoriesBtn").onclick = () => {
+  const checked = document.querySelectorAll(
+    ".categories-grid input:checked",
+  ).length;
+
+  if (checked === 0) {
+    alert("Izberi vsaj eno poglavje.");
+    return;
+  }
+
   categoriesModal.classList.remove("active");
 
   updateSelectedCount();
