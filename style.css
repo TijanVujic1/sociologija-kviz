@@ -35,7 +35,7 @@ body {
     linear-gradient(135deg, #020617, #0f172a, #1e293b);
 }
 
-/* ===== FVV STUDY HUB ===== */
+/* ===== FVV STUDY ===== */
 
 .subject-btn {
   text-decoration: none;
@@ -595,6 +595,52 @@ body {
   font-size: 1rem;
 }
 
+.review-section {
+  margin-top: 35px;
+
+  text-align: left;
+}
+
+.review-section h3 {
+  margin-bottom: 20px;
+
+  color: #38bdf8;
+}
+
+.review-item {
+  margin-bottom: 20px;
+
+  padding: 20px;
+
+  border-radius: 16px;
+
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.review-item h4 {
+  margin-bottom: 15px;
+
+  color: #f87171;
+}
+
+.review-item p {
+  margin-bottom: 12px;
+
+  line-height: 1.6;
+}
+
+.review-explanation {
+  margin-top: 15px;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  background: rgba(30, 41, 59, 0.8);
+
+  color: #cbd5e1;
+}
+
 /* ===== ANIMACIJE ===== */
 
 @keyframes fadeIn {
@@ -685,4 +731,98 @@ body {
   .back-home span {
     display: none;
   }
+
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 10px;
+  }
+
+  .dashboard-card {
+    padding: 14px;
+  }
+
+  .dashboard-card strong {
+    font-size: 1.7rem;
+  }
+
+  .dashboard-top span {
+    font-size: 0.8rem;
+  }
+}
+
+/* ===== DASHBOARD ===== */
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 12px;
+
+  margin-bottom: 30px;
+}
+
+.dashboard-card {
+  padding: 16px 18px;
+
+  background: rgba(30, 41, 59, 0.9);
+
+  border-radius: 16px;
+
+  text-align: center;
+
+  transition: 0.25s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+
+  background: rgba(40, 51, 69, 0.95);
+}
+
+.dashboard-top {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 12px;
+}
+
+.dashboard-top i {
+  font-size: 1.1rem;
+}
+
+.dashboard-top span {
+  color: #94a3b8;
+
+  font-size: 0.85rem;
+
+  font-weight: 500;
+}
+
+.dashboard-card strong {
+  display: block;
+
+  font-size: 1.5rem;
+
+  font-weight: 700;
+}
+
+/* Barve ikon */
+
+.fa-trophy {
+  color: #38bdf8;
+}
+
+.fa-xmark {
+  color: #f43f5e;
+}
+
+.fa-star {
+  color: #fbbf24;
+}
+
+.fa-bullseye {
+  color: #22c55e;
 }

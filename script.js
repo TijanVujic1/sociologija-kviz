@@ -36,6 +36,11 @@ const homeBtn = document.getElementById("homeBtn");
 const favoriteBtn = document.getElementById("favoriteBtn");
 const quitBtn = document.getElementById("quitBtn");
 
+const dashboardBest = document.getElementById("dashboardBest");
+const dashboardMistakes = document.getElementById("dashboardMistakes");
+const dashboardFavorites = document.getElementById("dashboardFavorites");
+const dashboardAccuracy = document.getElementById("dashboardAccuracy");
+
 // ===============================
 // STANJE APLIKACIJE
 // ===============================
@@ -46,11 +51,14 @@ let questions = [];
 let currentQuestion = 0;
 let score = 0;
 
-let wrongQuestions = JSON.parse(localStorage.getItem("wrongQuestions")) || [];
-
-let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+let quizReview = [];
 
 const SUBJECT = QUESTIONS[0].subject;
+
+let wrongQuestions =
+  JSON.parse(localStorage.getItem(`wrongQuestions-${SUBJECT}`)) || [];
+
+let favorites = JSON.parse(localStorage.getItem(`favorites-${SUBJECT}`)) || [];
 
 let categoryStats =
   JSON.parse(localStorage.getItem(`categoryStats-${SUBJECT}`)) || {};
@@ -118,6 +126,7 @@ startBtn.addEventListener("click", startQuiz);
 function startQuiz() {
   score = 0;
   currentQuestion = 0;
+  quizReview = [];
 
   const selectedCategories = [
     ...document.querySelectorAll(".categories-grid input:checked"),
@@ -231,6 +240,8 @@ function showQuestion() {
 
 function selectAnswer(button, selectedIndex) {
   const q = questions[currentQuestion];
+  const selectedAnswerText = q.options[selectedIndex];
+  const correctAnswerText = q.options[q.answer];
 
   const buttons = document.querySelectorAll(".option-btn");
 
@@ -270,7 +281,10 @@ function selectAnswer(button, selectedIndex) {
     // odstrani vprašanje iz napak
     if (gameMode === "mistakes") {
       wrongQuestions = wrongQuestions.filter((id) => id !== getQuestionKey(q));
-      localStorage.setItem("wrongQuestions", JSON.stringify(wrongQuestions));
+      localStorage.setItem(
+        `wrongQuestions-${SUBJECT}`,
+        JSON.stringify(wrongQuestions),
+      );
     }
   }
 
@@ -287,7 +301,10 @@ function selectAnswer(button, selectedIndex) {
 
     if (!wrongQuestions.includes(key)) {
       wrongQuestions.push(key);
-      localStorage.setItem("wrongQuestions", JSON.stringify(wrongQuestions));
+      localStorage.setItem(
+        `wrongQuestions-${SUBJECT}`,
+        JSON.stringify(wrongQuestions),
+      );
     }
 
     // Označi pravilen odgovor
@@ -316,6 +333,14 @@ function selectAnswer(button, selectedIndex) {
 
     explanation.innerHTML = `<strong>Razlaga:</strong><br>${q.explanation}`;
   }
+
+  quizReview.push({
+    question: q.question,
+    selected: selectedAnswerText,
+    correct: correctAnswerText,
+    explanation: q.explanation || "",
+    isCorrect: selectedIndex === q.answer,
+  });
 
   // ==========================
   // GUMB NASLEDNJE
@@ -401,7 +426,55 @@ function finishQuiz() {
             `,
     );
 
+  document.querySelectorAll(".review-section").forEach((el) => el.remove());
+
+  const mistakes = quizReview.filter((item) => !item.isCorrect);
+
+  if (mistakes.length > 0) {
+    const reviewHTML = mistakes
+      .map(
+        (item) => `
+    <div class="review-item">
+      <h4>❌ ${item.question}</h4>
+
+      <p>
+        <strong>Tvoj odgovor:</strong><br>
+        ${item.selected}
+      </p>
+
+      <p>
+        <strong>Pravilen odgovor:</strong><br>
+        ${item.correct}
+      </p>
+
+      ${
+        item.explanation
+          ? `
+        <div class="review-explanation">
+          ${item.explanation}
+        </div>
+      `
+          : ""
+      }
+    </div>
+  `,
+      )
+      .join("");
+
+    document.querySelector(".result-card").insertAdjacentHTML(
+      "beforeend",
+      `
+      <div class="review-section">
+        <h3>📚 Pregled napačnih odgovorov</h3>
+
+        ${reviewHTML}
+      </div>
+      `,
+    );
+  }
+
   saveBestScore();
+  updateDashboard();
 }
 
 // ===============================
@@ -493,7 +566,7 @@ if (favoriteBtn) {
     } else {
       favorites = favorites.filter((id) => id !== key);
     }
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    localStorage.setItem(`favorites-${SUBJECT}`, JSON.stringify(favorites));
     updateFavoriteButton();
   });
 }
@@ -596,4 +669,28 @@ function updateSelectedCount() {
       : `${checked} od ${total} poglavij`;
 }
 
+function updateDashboard() {
+  const best = localStorage.getItem(`bestScore-${SUBJECT}`) || 0;
+
+  dashboardBest.textContent = best;
+
+  dashboardMistakes.textContent = wrongQuestions.length;
+
+  dashboardFavorites.textContent = favorites.length;
+
+  let totalCorrect = 0;
+  let totalAnswered = 0;
+
+  Object.values(categoryStats).forEach((stat) => {
+    totalCorrect += stat.correct;
+    totalAnswered += stat.total;
+  });
+
+  const accuracy =
+    totalAnswered === 0 ? 0 : Math.round((totalCorrect / totalAnswered) * 100);
+
+  dashboardAccuracy.textContent = `${accuracy}%`;
+}
+
+updateDashboard();
 updateSelectedCount();
